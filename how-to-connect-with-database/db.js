@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
-const connectToMongo = async()=>{
-    const res =  await mongoose.connect('mongodb://127.0.0.1:27017/todo-list')
-    res && console.log('Connect to Database')
-
+const connectToMongodb = async()=>{
+    const res = await mongoose.connect('mongodb://127.0.0.1:27017/database');
+    res && console.log('connect to database..')
 }
-module.exports = connectToMongo;
+// export this function
+module.exports = connectToMongodb;
