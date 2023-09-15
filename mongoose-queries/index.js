@@ -39,12 +39,32 @@ app.get('/users', async (req,res)=>{
 
 // Mongoose Queries-3: Read-> Model.findById()
 // Route to fetch a user by ID
-app.get('/users/:id', async (req, res) => {
-  try {
-    const userId = req.params.id;
+// Let's the example of Model.findById...
+app.get('/users',async (req,res)=>{
+  try{
+    const userId = req.params.id
+  // Use Model.findById() to retrieve a user..
+  const user = await userModel.findById(userId);
+  // just the condition if user not present..
+  if(!user){
+    res.status(404).json({error:'user not found'})
+  }
+  res.json(user)
+  }
+  catch(err){
+    res.status(501).json({error:err.message})
+  }
+  
+})
 
-    // Use Model.findById() to retrieve a user by ID
-    const user = await userModel.findById(userId);
+// Mongoose Queries-4: Read-> Model.findOne()
+// Route to fetch a user by a condition (e.g., username)
+app.get('/users', async (req, res) => {
+  try {
+    const condition = req.query.username; // Get the condition from query parameters
+
+    // Use Model.findOne() to retrieve a user by a condition
+    const user = await userModel.findOne({ username: condition });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
@@ -55,6 +75,7 @@ app.get('/users/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
