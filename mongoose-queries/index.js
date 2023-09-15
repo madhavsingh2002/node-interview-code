@@ -10,6 +10,7 @@ app.use(bodyParser.json());
 connectToMongodb()
 
 // Mongoose Queries-1: Create-> Model.Create()
+// Route to create a user
 // Let's see the example of Model.Create()
 app.post('/users', async (req,res)=>{
   try{
@@ -24,6 +25,7 @@ app.post('/users', async (req,res)=>{
   
 })
 // Mongoose Queries-2: Read-> Model.find()
+// Route to fetch all user.
 // Let's see the example of Model.find()
 app.get('/users', async (req,res)=>{
   try{
@@ -35,7 +37,7 @@ app.get('/users', async (req,res)=>{
   }
 })
 
-
+// Mongoose Queries-3: Read-> Model.findById()
 // Route to fetch a user by ID
 app.get('/users/:id', async (req, res) => {
   try {
