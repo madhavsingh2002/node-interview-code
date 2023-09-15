@@ -1,90 +1,95 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+// Hello! Everyone, Let's Perform CRUD Operation in Node.js
+// Step-1: Create the Server...
+// Step-2: Connect to Locol Database using mongoose...
+// Step-3: Define schema and model...
+// Step-4: Create Api for CRUD...
+// Step-5: First create a new task api...
+// Step-6: Read All tasks...
+const express = require('express')
+const mongoose = require('mongoose')
+const bodyParser= require('body-parser')
+//  Middleware to parse json data from request...
+app.use(bodyParser.json())
+const app = express()
 
-const app = express();
-const PORT = 8000;
+// MongoDB Connection...
+mongoose.connect('mongodb://127.0.0.1:27017/crud',{
+  useNewUrlParser:true,
+  useUnifiedTopology:true
+})
 
-// Middleware to parse JSON data from requests
-app.use(bodyParser.json());
-
-// MongoDB connection
-mongoose.connect('mongodb://127.0.0.1:27017/crud', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// Define a Task schema and model
+// Task Schema and Model...
 const taskSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  completed: Boolean,
-});
+  title:String,
+  description:String,
+  completed:Boolean
+})
+const Task = mongoose.model('Task',taskSchema);// Model
 
-const Task = mongoose.model('Task', taskSchema);
-
-// Create a new task
-app.post('/tasks', async (req, res) => {
-  try {
+// Create a new task...
+app.post('/tasks',async(req,res)=>{
+  try{
     const newTask = new Task(req.body);
-    await newTask.save();
-    res.status(201).json(newTask);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    await newTask.save()
+    res.status(201).json(newTask)
   }
-});
-
-// Read all tasks
-app.get('/tasks', async (req, res) => {
-  try {
-    const tasks = await Task.find();
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  catch(err){
+    res.status(400).json({error:err.message})
   }
-});
+})
 
-// Read a specific task by its ID
-app.get('/tasks/:id', async (req, res) => {
-  try {
-    const task = await Task.findById(req.params.id);
-    if (!task) {
-      return res.status(404).json({ error: 'Task not found' });
+// Read All tasks
+app.get('/tasks/:id',async(req,res)=>{
+  try{
+    const task = await Task.find();
+    res.json(task)
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+// Read a specific task by its ID;
+app.get('tasks/:id',async(req,res)=>{
+  try{
+    const task = await Task.findById(req.params.id)
+    if(!task){
+      return res.status(404).json({error:'task not found'})
+
     }
-    res.json(task);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json(task)
   }
-});
-
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
 // Update a task by its ID
-app.put('/tasks/:id', async (req, res) => {
-  try {
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!updatedTask) {
-      return res.status(404).json({ error: 'Task not found' });
+app.put('/tasks/:id',async(req,res)=>{
+  try{
+    const updatedTask = await Task.findByIdAndUpdate(req.params.id,req.body,{
+      new:true
+    })
+    if(!updatedTask){
+      return res.status(404).json({error:'task not found'})
     }
-    res.json(updatedTask);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json(updatedTask)
   }
-});
-
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
 // Delete a task by its ID
-app.delete('/tasks/:id', async (req, res) => {
-  try {
+app.delete('/task/:id',async(req,res)=>{
+  try{
     const deletedTask = await Task.findByIdAndRemove(req.params.id);
-    if (!deletedTask) {
-      return res.status(404).json({ error: 'Task not found' });
+    if(!deletedTask){
+      return res.status(404).json({error:'task not found'})
     }
-    res.json({ message: 'Task deleted' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json({message:'task Deleled'})
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+app.listen(8000,()=>{
+  console.log("Server is Running...")
+})
