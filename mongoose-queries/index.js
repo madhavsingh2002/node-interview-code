@@ -59,22 +59,22 @@ app.get('/users',async (req,res)=>{
 
 // Mongoose Queries-4: Read-> Model.findOne()
 // Route to fetch a user by a condition (e.g., username)
-app.get('/users', async (req, res) => {
-  try {
-    const condition = req.query.username; // Get the condition from query parameters
+app.get('users', async(req,res)=>{
+  try{
+     const condition = req.query.username;// get the condition from query parameters.
 
-    // Use Model.findOne() to retrieve a user by a condition
-    const user = await userModel.findOne({ username: condition });
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+     // use Model.findOne() to retrieve a user by a condition...
+    const user = await userModel.findOne({username:condition});
+    if(!user){
+      return res.status(404).json({error: 'user not found'})
     }
-
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json(user)
   }
-});
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
