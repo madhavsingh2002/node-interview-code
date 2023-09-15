@@ -24,17 +24,35 @@ app.post('/users', async (req,res)=>{
   
 })
 // Mongoose Queries-2: Read-> Model.find()
-// Route to fetch all users
-app.get('/users', async (req, res) => {
-  try {
-    // Use Model.find() to retrieve all users
-    const users = await userModel.find();
+// Let's see the example of Model.find()
+app.get('/users', async (req,res)=>{
+  try{
+    const users = await userModel.find() // Help us to find all the users...
     res.json(users);
+  }
+  catch(err){
+    res.status(500).json({error: err.message})
+  }
+})
+
+
+// Route to fetch a user by ID
+app.get('/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Use Model.findById() to retrieve a user by ID
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
