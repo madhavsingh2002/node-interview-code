@@ -152,8 +152,25 @@ app.put('/user/:id', async(req,res)=>{
     res.json({error:err.message})
   }
 })
-// Let's test this api...
-// thank's for watching.....
+// Mongoose Queries-9: Update-> Model.deleteOne()
+// Route to delete a user by a condition (e.g., username)
+app.delete('/users/:username', async (req, res) => {
+  try {
+    const condition = req.params.username; // Get the condition from route parameters
+
+    // Use Model.deleteOne() to delete a user by a condition
+    const result = await userModel.deleteOne({ username: condition });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
