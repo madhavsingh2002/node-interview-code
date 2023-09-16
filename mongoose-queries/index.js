@@ -170,18 +170,34 @@ app.delete('/users/:username', async (req,res)=>{
 })
 // Mongoose Queries-10: Update-> Model.deleteMany()
 // Route to delete multiple users by a condition (e.g., age)
-app.delete('/users', async (req, res) => {
+// Let's see the example of it....
+app.delete('/users',async (req,res)=>{
+  try{
+    const condition =  req.query.age;// Get the condition from query parameters...
+    // Use Model.DeleteOne() to delete multiple users by a condition...
+    const result =  await userModel.deleteMany({age:condition})
+    if(result.deletedCount===0){
+      return res.status(404).json({error:'User not found'})
+    }
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+// Mongoose Queries-10: Update-> Model.findOneAndDelete()
+// Route to find and delete a user by a condition (e.g., username)
+app.delete('/users/:username', async (req, res) => {
   try {
-    const condition = req.query.age; // Get the condition from query parameters
+    const condition = req.params.username; // Get the condition from route parameters
 
-    // Use Model.deleteMany() to delete multiple users by a condition
-    const result = await User.deleteMany({ age: condition });
+    // Use Model.findOneAndDelete() to find and delete a user by a condition
+    const user = await userModel.findOneAndDelete({ username: condition });
 
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: 'No users found or no users were deleted' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ message: 'Users deleted successfully' });
+    res.json({ message: 'User deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
