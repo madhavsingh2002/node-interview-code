@@ -77,24 +77,41 @@ app.get('users', async(req,res)=>{
 
 // Mongoose Queries-5: Update-> Model.updateOne()
 // Route to update a user by a condition (e.g., username)
-app.put('/users/:username', async (req, res) => {
+
+app.put('/users/:username', async (req,res)=>{
+  try{
+    const condition = req.params.username;// get the conditions from route Parameters.
+    const UpdatedData= req.body;
+    // use Model.UpdateOne() to updated a user by a condition..
+    const result = await userModel.updateOne({username:condition},UpdatedData)
+    if(result.nModified===0){
+      return res.status(404).json({error:'User not found or no changes were made'})
+    }
+    res.json({message:'user Updated successfully'})
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+// Mongoose Queries-6: Update-> Model.updateMany()
+// Route to update multiple users by a condition (e.g., age)
+app.put('/users', async (req, res) => {
   try {
-    const condition = req.params.username; // Get the condition from route parameters
+    const condition = req.query.age; // Get the condition from query parameters
     const updatedData = req.body; // Get the updated data from the request body
 
-    // Use Model.updateOne() to update a user by a condition
-    const result = await userModel.updateOne({ username: condition }, updatedData);
+    // Use Model.updateMany() to update multiple users by a condition
+    const result = await userModel.updateMany({ age: condition }, updatedData);
 
     if (result.nModified === 0) {
-      return res.status(404).json({ error: 'User not found or no changes were made' });
+      return res.status(404).json({ error: 'No users found or no changes were made' });
     }
 
-    res.json({ message: 'User updated successfully' });
+    res.json({ message: 'Users updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
