@@ -75,6 +75,25 @@ app.get('users', async(req,res)=>{
   }
 })
 
+// Mongoose Queries-5: Update-> Model.updateOne()
+// Route to update a user by a condition (e.g., username)
+app.put('/users/:username', async (req, res) => {
+  try {
+    const condition = req.params.username; // Get the condition from route parameters
+    const updatedData = req.body; // Get the updated data from the request body
+
+    // Use Model.updateOne() to update a user by a condition
+    const result = await userModel.updateOne({ username: condition }, updatedData);
+
+    if (result.nModified === 0) {
+      return res.status(404).json({ error: 'User not found or no changes were made' });
+    }
+
+    res.json({ message: 'User updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
