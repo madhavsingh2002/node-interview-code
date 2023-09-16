@@ -184,14 +184,29 @@ app.delete('/users',async (req,res)=>{
     res.status(505).json({error:err.message})
   }
 })
-// Mongoose Queries-10: Update-> Model.findOneAndDelete()
+// Mongoose Queries-11: Update-> Model.findOneAndDelete()
 // Route to find and delete a user by a condition (e.g., username)
-app.delete('/users/:username', async (req, res) => {
+// Let's the example of it..
+app.delete('/users/:username', async (req,res)=>{
+  try{
+    const condition =  req.params.username; // Get the condition from route Paramater..
+    const user =  await userModel.findOneAndDelete({username:condition});
+    if(!user){
+      return res.status(404).json({error:'User not found'})
+    }
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+// Mongoose Queries-12: Update-> Model.findByIdAndDelete()
+// Route to find and delete a user by ID
+app.delete('/users/:id', async (req, res) => {
   try {
-    const condition = req.params.username; // Get the condition from route parameters
+    const userId = req.params.id; // Get the user ID from route parameters
 
-    // Use Model.findOneAndDelete() to find and delete a user by a condition
-    const user = await userModel.findOneAndDelete({ username: condition });
+    // Use Model.findByIdAndDelete() to find and delete a user by ID
+    const user = await userModel.findByIdAndDelete(userId);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
