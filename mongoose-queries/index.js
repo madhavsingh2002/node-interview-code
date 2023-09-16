@@ -95,19 +95,40 @@ app.put('/users/:username', async (req,res)=>{
 })
 // Mongoose Queries-6: Update-> Model.updateMany()
 // Route to update multiple users by a condition (e.g., age)
-app.put('/users', async (req, res) => {
+app.put('/users',async(req,res)=>{
+  try{
+    const condition = req.query.age;// Get the condition from query Parameters.
+    const updatedData=req.body; // Get the updated body from the request body.
+    // Use Model.UpdateMany() to update multiple users by a condition..
+    const result = await userModel.updateMany({age:condition},updatedData);
+    if(result.nModified===0){
+      return res.status(404).json({error:'No users found'})
+    }
+    res.json({message:'Users updated successfully'})
+
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+// Mongoose Queries-7: Update-> Model.findOneAndUpdate()
+// Route to find and update a user by a condition (e.g., username)
+app.put('/users/:username', async (req, res) => {
   try {
-    const condition = req.query.age; // Get the condition from query parameters
+    const condition = req.params.username; // Get the condition from route parameters
     const updatedData = req.body; // Get the updated data from the request body
 
-    // Use Model.updateMany() to update multiple users by a condition
-    const result = await userModel.updateMany({ age: condition }, updatedData);
+    // Use Model.findOneAndUpdate() to find and update a user by a condition
+    const user = await userModel.findOneAndUpdate({ username: condition }, updatedData, {
+      new: true, // Return the updated user document
+      runValidators: true, // Run Mongoose validation on the update
+    });
 
-    if (result.nModified === 0) {
-      return res.status(404).json({ error: 'No users found or no changes were made' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ message: 'Users updated successfully' });
+    res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
