@@ -134,26 +134,26 @@ app.put('/users/:username',async(req,res)=>{
 })
 // Mongoose Queries-8: Update-> Model.findByIdAndUpdate()
 // Route to find and update a user by ID
-app.put('/users/:id', async (req, res) => {
-  try {
-    const userId = req.params.id; // Get the user ID from route parameters
-    const updatedData = req.body; // Get the updated data from the request body
-
-    // Use Model.findByIdAndUpdate() to find and update a user by ID
-    const user = await userModel.findByIdAndUpdate(userId, updatedData, {
-      new: true, // Return the updated user document
-      runValidators: true, // Run Mongoose validation on the update
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+// Let's see the example of it...
+app.put('/user/:id', async(req,res)=>{
+  try{
+    const userId = req.params.id;// get the user Id from route Parameters.
+    const updatedBody =req.body; 
+    const userData = await userModel.findByIdAndUpdate(userId,updatedBody,{
+      new: true,
+      runValidators:true
+    })
+    if(!userData){
+      res.status(404).json({message:'user not found'})
     }
-
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(userData)
   }
-});
+  catch(err){
+    res.json({error:err.message})
+  }
+})
+// Let's test this api...
+// thank's for watching.....
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
