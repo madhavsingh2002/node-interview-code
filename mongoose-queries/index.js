@@ -113,13 +113,34 @@ app.put('/users',async(req,res)=>{
 })
 // Mongoose Queries-7: Update-> Model.findOneAndUpdate()
 // Route to find and update a user by a condition (e.g., username)
-app.put('/users/:username', async (req, res) => {
+// Let's see the example of it.....
+app.put('/users/:username',async(req,res)=>{
+  try{
+    const condition = req.params.username;// Get the condition from route Parameters
+    const updatedData= req.body;// Get the Updated Data from the request body.
+
+    const userData = await userModel.findOneAndUpdate({username:condition},updatedData,{
+      new:true,
+      runValidators: true
+    })
+    if(!user){
+      res.status(404).json({message:'User not found'})
+    }
+    res.json(userData)
+  }
+  catch(err){
+    res.status(501).json({error:err.message})
+  }
+})
+// Mongoose Queries-8: Update-> Model.findByIdAndUpdate()
+// Route to find and update a user by ID
+app.put('/users/:id', async (req, res) => {
   try {
-    const condition = req.params.username; // Get the condition from route parameters
+    const userId = req.params.id; // Get the user ID from route parameters
     const updatedData = req.body; // Get the updated data from the request body
 
-    // Use Model.findOneAndUpdate() to find and update a user by a condition
-    const user = await userModel.findOneAndUpdate({ username: condition }, updatedData, {
+    // Use Model.findByIdAndUpdate() to find and update a user by ID
+    const user = await userModel.findByIdAndUpdate(userId, updatedData, {
       new: true, // Return the updated user document
       runValidators: true, // Run Mongoose validation on the update
     });
