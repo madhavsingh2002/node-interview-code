@@ -395,18 +395,36 @@ app.get('/usersort', async(req,res)=>{
 // Mongoose Aggregation-7: $limit
 // Route to perform aggregation with $limit stage
 
-app.get('/limitedusers', async (req, res) => {
-  try {
-    const limitValue = parseInt(req.query.limit) || 10; // Get limit value from query parameters (default to 10 if not provided)
+app.get('/limitedusers',async(req,res)=>{
+  try{
+    const LimitValue = parseInt(req.query.limit);// You will this limit from query..
+    const Pipeline=[
+      {
+        $limit:LimitValue
+      }
+    ]
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
 
-    // Example aggregation pipeline with $limit stage to limit the output
+// Mongoose Aggregation-8: $skip
+// Route to perform aggregation with $skip stage
+app.get('/skippedusers', async (req, res) => {
+  try {
+    const skipValue = parseInt(req.query.skip) || 0; // Get skip value from query parameters (default to 0 if not provided)
+
+    // Example aggregation pipeline with $skip stage to skip the initial documents
     const pipeline = [
       {
-        $limit: limitValue, // Limit the output to the specified number of documents
+        $skip: skipValue, // Skip the specified number of documents
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $limit stage
+    // Use Model.aggregate() to perform aggregation with $skip stage
     const result = await userModel.aggregate(pipeline);
 
     res.json(result);
