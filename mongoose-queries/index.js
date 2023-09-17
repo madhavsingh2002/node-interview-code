@@ -315,7 +315,7 @@ app.get('/filteredUsers',async (req,res)=>{
 
 // Mongoose Aggregation-4: $project
 // Route to perform aggregation with $project stage
-// Let's see the simple example of it...
+
 app.get('/usersprotection', async(req,res)=>{
   try{
     // Example aggregation pipeline with $project stage to select specific fields.
@@ -343,6 +343,8 @@ app.get('/usersprotection', async(req,res)=>{
     res.status(505).json({error:err.message})
   }
 })
+
+
 // Mongoose Aggregation-5: $Group
 // Route to perform aggregation with $group stage
 
@@ -370,18 +372,41 @@ app.get('/usergroup', async(req,res)=>{
 // Mongoose Aggregation-6: $sort
 // Route to perform aggregation with $sort stage
 
-app.get('/sortedusers', async (req, res) => {
+
+app.get('/usersort', async(req,res)=>{
+  try{
+    // use sort method to arrange our user according to accending, age...
+    const Pipeline =[
+      {
+        $sort:{
+          age: 1,// younger to older users....
+        }
+      }
+    ]
+    const result =  await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+
+
+// Mongoose Aggregation-7: $limit
+// Route to perform aggregation with $limit stage
+
+app.get('/limitedusers', async (req, res) => {
   try {
-    // Example aggregation pipeline with $sort stage to sort users by age in descending order
+    const limitValue = parseInt(req.query.limit) || 10; // Get limit value from query parameters (default to 10 if not provided)
+
+    // Example aggregation pipeline with $limit stage to limit the output
     const pipeline = [
       {
-        $sort: {
-          age: 1, // Sort by the 'age' field in descending order
-        },
+        $limit: limitValue, // Limit the output to the specified number of documents
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $sort stage
+    // Use Model.aggregate() to perform aggregation with $limit stage
     const result = await userModel.aggregate(pipeline);
 
     res.json(result);
