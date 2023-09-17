@@ -315,27 +315,49 @@ app.get('/filteredUsers',async (req,res)=>{
 
 // Mongoose Aggregation-4: $project
 // Route to perform aggregation with $project stage
+// Let's see the simple example of it...
+app.get('/usersprotection', async(req,res)=>{
+  try{
+    // Example aggregation pipeline with $project stage to select specific fields.
+    const Pipeline =[
+      {
+        $project:{
+          _id:0, // Exclude the id field
+          username:1, // Include the username field..
+          age:1,// include the age field
+          role:1,// include the role field
+          fullName:{
+            $concat:[
+              '$username','(', {$toString:'$age'},'years old',//convert age to string..
+            ]
+          }
 
-app.get('/userProjection', async (req, res) => {
+        }
+      }
+    ]
+    // use Model.aggregate() to perform aggregation with $project stage..
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+// Mongoose Aggregation-5: $Group
+// Route to perform aggregation with $group stage
+app.get('/usergroup', async (req, res) => {
   try {
-    // Example aggregation pipeline with $project stage to select specific fields
+    // Example aggregation pipeline with $group stage to calculate average age by role
     const pipeline = [
       {
-        $project: {
-          _id: 0, // Exclude the _id field
-          username: 1, // Include the username field
-          age: 1, // Include the age field
-          role: 1, // Include the role field
-          fullName: {
-            $concat: [
-              '$username', ' (', { $toString: '$age' }, ' years old)', // Convert age to string
-            ],
-          }, // Create a computed field
+        $group: {
+          _id: '$role', // Group by the 'role' field
+          averageAge: { $avg: '$age' }, // Calculate average age for each group
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $project stage
+    // Use Model.aggregate() to perform aggregation with $group stage
     const result = await userModel.aggregate(pipeline);
 
     res.json(result);
@@ -343,6 +365,8 @@ app.get('/userProjection', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// This is simple example of it, i hope you like, Thank's for watching....
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
