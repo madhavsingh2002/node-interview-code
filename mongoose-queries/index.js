@@ -3,6 +3,7 @@ const mongoose=require('mongoose')
 const bodyParser = require('body-parser');
 const connectToMongodb = require('./db.js');
 const userModel = require('./User.js');
+const postModel = require('./Post.js');
 
 const app = express();
 const PORT = 8000;
@@ -18,6 +19,18 @@ app.post('/users', async (req,res)=>{
     const newUser= await userModel.create(userData); // here create is used create new  user ...
     // let's test this...
     res.status(201).json(newUser)
+  }
+  catch(err){
+    res.status(501).json({error:err.message})
+  }
+  
+})
+app.post('/post', async (req,res)=>{
+  try{
+    const postData= req.body;
+    const newPost= await postModel.create(postData); // here create is used create new  user ...
+    // let's test this...
+    res.status(201).json(newPost)
   }
   catch(err){
     res.status(501).json({error:err.message})
@@ -229,24 +242,49 @@ app.get('/userCount',async(req,res)=>{
     res.status(505).json({error:err.message})
   }
 })
-// Mongoose Aggregation-1:
+// Mongoose Aggregation-1:Sample-Pipeline:
 // Route to perform aggregation on user data
-app.get('/userStats', async (req, res) => {
-  try {
-    // Example aggregation pipeline: Group users by role and calculate the average age
-    const pipeline = [
+// Let's see the simple example of it....
+app.get('/userstats',async (req,res)=>{
+  try{
+    const Pipeline = [
       {
         $group: {
-          _id: '$role', // Group by the 'role' field
-          averageAge: { $avg: '$age' }, // Calculate average age for each group
-        },
-      },
-    ];
+          _id:'$role',// Group by the role field..
+          averageAge: {$avg:'$age'}// Calculate average age for each group,
+        }
+      }
+    ]
+    // use Model.aggregate() to perform aggregation..
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
 
-    // Use Model.aggregate() to perform aggregation
-    const result = await userModel.aggregate(pipeline);
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+// Create the Post...
+app.post('/posts', async (req,res)=>{
+  try{
+    const postData= req.body;
+    const newPost= await postModel.create(postData); // here create is used create new  user ...
+    // let's test this...
+    res.status(201).json(newPost)
+  }
+  catch(err){
+    res.status(501).json({error:err.message})
+  }
+  
+})
+// Mongoose Aggregation-2::
+// Route to get posts and populate the author field
+app.get('/posts', async (req, res) => {
+  try {
+    // Use .populate() to replace the 'author' field with user data
+    const posts = await postModel.find().populate('author', 'username email');
 
-    res.json(result);
+    res.json(posts);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
