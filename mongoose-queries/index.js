@@ -12,7 +12,7 @@ connectToMongodb()
 
 // Mongoose Queries-1: Create-> Model.Create()
 // Route to create a user
-// Let's see the example of Model.Create()
+
 app.post('/users', async (req,res)=>{
   try{
     const userData= req.body;
@@ -39,7 +39,7 @@ app.post('/post', async (req,res)=>{
 })
 // Mongoose Queries-2: Read-> Model.find()
 // Route to fetch all user.
-// Let's see the example of Model.find()
+
 app.get('/users', async (req,res)=>{
   try{
     const users = await userModel.find() // Help us to find all the users...
@@ -52,7 +52,7 @@ app.get('/users', async (req,res)=>{
 
 // Mongoose Queries-3: Read-> Model.findById()
 // Route to fetch a user by ID
-// Let's the example of Model.findById...
+
 app.get('/users',async (req,res)=>{
   try{
     const userId = req.params.id
@@ -126,7 +126,7 @@ app.put('/users',async(req,res)=>{
 })
 // Mongoose Queries-7: Update-> Model.findOneAndUpdate()
 // Route to find and update a user by a condition (e.g., username)
-// Let's see the example of it.....
+
 app.put('/users/:username',async(req,res)=>{
   try{
     const condition = req.params.username;// Get the condition from route Parameters
@@ -147,7 +147,7 @@ app.put('/users/:username',async(req,res)=>{
 })
 // Mongoose Queries-8: Update-> Model.findByIdAndUpdate()
 // Route to find and update a user by ID
-// Let's see the example of it...
+
 app.put('/user/:id', async(req,res)=>{
   try{
     const userId = req.params.id;// get the user Id from route Parameters.
@@ -167,7 +167,7 @@ app.put('/user/:id', async(req,res)=>{
 })
 // Mongoose Queries-9: Update-> Model.deleteOne()
 // Route to delete a user by a condition (e.g., username)
-// Let's the Example of it..
+
 app.delete('/users/:username', async (req,res)=>{
   try{
     const condition = req.params.username;
@@ -183,7 +183,7 @@ app.delete('/users/:username', async (req,res)=>{
 })
 // Mongoose Queries-10: Update-> Model.deleteMany()
 // Route to delete multiple users by a condition (e.g., age)
-// Let's see the example of it....
+
 app.delete('/users',async (req,res)=>{
   try{
     const condition =  req.query.age;// Get the condition from query parameters...
@@ -199,7 +199,7 @@ app.delete('/users',async (req,res)=>{
 })
 // Mongoose Queries-11: Update-> Model.findOneAndDelete()
 // Route to find and delete a user by a condition (e.g., username)
-// Let's the example of it..
+
 app.delete('/users/:username', async (req,res)=>{
   try{
     const condition =  req.params.username; // Get the condition from route Paramater..
@@ -214,7 +214,7 @@ app.delete('/users/:username', async (req,res)=>{
 })
 // Mongoose Queries-12: Update-> Model.findByIdAndDelete()
 // Route to find and delete a user by ID
-// Let's see the example of it....
+
 app.delete('/users/:id',async(req,res)=>{
   try{
     const condition = req.params.id; // Get the user Id....
@@ -231,7 +231,7 @@ app.delete('/users/:id',async(req,res)=>{
 })
 // Mongoose Queries-13: Model.countDocuments()
 // Route to count documents that match a condition (e.g., users with a specific role)
-// Let' See the Example of it....
+
 app.get('/userCount',async(req,res)=>{
   try{
     const condition =  {role: 'user'};// Specify the condition to count documents...
@@ -244,7 +244,7 @@ app.get('/userCount',async(req,res)=>{
 })
 // Mongoose Aggregation-1:Sample-Pipeline:
 // Route to perform aggregation on user data
-// Let's see the simple example of it....
+
 app.get('/userstats',async (req,res)=>{
   try{
     const Pipeline = [
@@ -277,14 +277,40 @@ app.post('/posts', async (req,res)=>{
   }
   
 })
-// Mongoose Aggregation-2::
+// Mongoose Aggregation-2:populate()
 // Route to get posts and populate the author field
-app.get('/posts', async (req, res) => {
-  try {
-    // Use .populate() to replace the 'author' field with user data
-    const posts = await postModel.find().populate('author', 'username email');
 
-    res.json(posts);
+app.get('/posts',async(req,res)=>{
+  try{
+    // this populate will replace authors field with username email
+    const result =  await postModel.find().populate('author','username email')
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+// Mongoose Aggregation-3: $match
+// Route to perform aggregation with $match stage
+
+app.get('/filteredUsers', async (req, res) => {
+  try {
+    const minAge = parseInt(req.query.minAge) || 0; // Get minAge from query parameters (default to 0 if not provided)
+
+    // Example aggregation pipeline with $match stage to filter users by minimum age
+    const pipeline = [
+      {
+        $match: {
+          age: { $gte: minAge }, // Filter users with age greater than or equal to minAge
+        },
+      },
+    ];
+
+    // Use Model.aggregate() to perform aggregation with $match stage
+    const result = await userModel.aggregate(pipeline);
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
