@@ -345,19 +345,43 @@ app.get('/usersprotection', async(req,res)=>{
 })
 // Mongoose Aggregation-5: $Group
 // Route to perform aggregation with $group stage
-app.get('/usergroup', async (req, res) => {
+
+app.get('/usergroup', async(req,res)=>{
+  try{
+    // Create the simple pipeline..
+    const Pipeline = [
+      {
+        $group:{
+          _id: '$role',// group by the role field
+          averageAge: {$avg:'$age'}
+
+        }
+      }
+    ]
+    // use Model.aggregate() to perform aggregation with $group stage..
+    const result =  await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+// Mongoose Aggregation-6: $sort
+// Route to perform aggregation with $sort stage
+
+app.get('/sortedusers', async (req, res) => {
   try {
-    // Example aggregation pipeline with $group stage to calculate average age by role
+    // Example aggregation pipeline with $sort stage to sort users by age in descending order
     const pipeline = [
       {
-        $group: {
-          _id: '$role', // Group by the 'role' field
-          averageAge: { $avg: '$age' }, // Calculate average age for each group
+        $sort: {
+          age: 1, // Sort by the 'age' field in descending order
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $group stage
+    // Use Model.aggregate() to perform aggregation with $sort stage
     const result = await userModel.aggregate(pipeline);
 
     res.json(result);
@@ -366,7 +390,6 @@ app.get('/usergroup', async (req, res) => {
   }
 });
 
-// This is simple example of it, i hope you like, Thank's for watching....
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
