@@ -218,19 +218,39 @@ app.delete('/users/:id',async(req,res)=>{
 })
 // Mongoose Queries-13: Model.countDocuments()
 // Route to count documents that match a condition (e.g., users with a specific role)
-app.get('/userCount', async (req, res) => {
+// Let' See the Example of it....
+app.get('/userCount',async(req,res)=>{
+  try{
+    const condition =  {role: 'user'};// Specify the condition to count documents...
+    const result =  await userModel.countDocuments(condition)
+    res.json({result})
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+// Mongoose Aggregation-1:
+// Route to perform aggregation on user data
+app.get('/userStats', async (req, res) => {
   try {
-    const condition = { role: 'user' }; // Specify the condition to count documents
+    // Example aggregation pipeline: Group users by role and calculate the average age
+    const pipeline = [
+      {
+        $group: {
+          _id: '$role', // Group by the 'role' field
+          averageAge: { $avg: '$age' }, // Calculate average age for each group
+        },
+      },
+    ];
 
-    // Use Model.countDocuments() to count documents that match the condition
-    const count = await userModel.countDocuments(condition);
+    // Use Model.aggregate() to perform aggregation
+    const result = await userModel.aggregate(pipeline);
 
-    res.json({ count });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
