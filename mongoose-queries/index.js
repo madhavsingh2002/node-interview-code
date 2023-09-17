@@ -201,22 +201,36 @@ app.delete('/users/:username', async (req,res)=>{
 })
 // Mongoose Queries-12: Update-> Model.findByIdAndDelete()
 // Route to find and delete a user by ID
-app.delete('/users/:id', async (req, res) => {
-  try {
-    const userId = req.params.id; // Get the user ID from route parameters
+// Let's see the example of it....
+app.delete('/users/:id',async(req,res)=>{
+  try{
+    const condition = req.params.id; // Get the user Id....
 
-    // Use Model.findByIdAndDelete() to find and delete a user by ID
-    const user = await userModel.findByIdAndDelete(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    const result = await userModel.findByIdAndDelete(condition)
+    if(!result){
+      return res.status(404).json({error:'User not found'});
     }
+    res.json({message:'User deleted Successfully'})
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+// Mongoose Queries-13: Model.countDocuments()
+// Route to count documents that match a condition (e.g., users with a specific role)
+app.get('/userCount', async (req, res) => {
+  try {
+    const condition = { role: 'user' }; // Specify the condition to count documents
 
-    res.json({ message: 'User deleted successfully' });
+    // Use Model.countDocuments() to count documents that match the condition
+    const count = await userModel.countDocuments(condition);
+
+    res.json({ count });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
