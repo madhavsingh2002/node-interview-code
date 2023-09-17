@@ -294,20 +294,48 @@ app.get('/posts',async(req,res)=>{
 // Mongoose Aggregation-3: $match
 // Route to perform aggregation with $match stage
 
-app.get('/filteredUsers', async (req, res) => {
-  try {
-    const minAge = parseInt(req.query.minAge) || 0; // Get minAge from query parameters (default to 0 if not provided)
+app.get('/filteredUsers',async (req,res)=>{
+  try{
+    const minAge= parseInt(req.query.minAge) || 0;// here we get the min age for filtering the users
+    // create the simple pipeline..
+    const Pipeline = [
+      {
+        $match:{
+          age: {$gte:minAge}
+        }
+      }
+    ]
+    const userData= await userModel.aggregate(Pipeline)
+    res.json(userData)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
 
-    // Example aggregation pipeline with $match stage to filter users by minimum age
+// Mongoose Aggregation-4: $project
+// Route to perform aggregation with $project stage
+
+app.get('/userProjection', async (req, res) => {
+  try {
+    // Example aggregation pipeline with $project stage to select specific fields
     const pipeline = [
       {
-        $match: {
-          age: { $gte: minAge }, // Filter users with age greater than or equal to minAge
+        $project: {
+          _id: 0, // Exclude the _id field
+          username: 1, // Include the username field
+          age: 1, // Include the age field
+          role: 1, // Include the role field
+          fullName: {
+            $concat: [
+              '$username', ' (', { $toString: '$age' }, ' years old)', // Convert age to string
+            ],
+          }, // Create a computed field
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $match stage
+    // Use Model.aggregate() to perform aggregation with $project stage
     const result = await userModel.aggregate(pipeline);
 
     res.json(result);
