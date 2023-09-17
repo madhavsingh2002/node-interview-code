@@ -433,24 +433,10 @@ app.get('/skippedusers',async(req,res)=>{
 
 // Mongoose Aggregation-9: $unwind
 // Route to perform aggregation with $unwind stage
+// The $unwind stage in MongoDB's aggregation framework is used to deconstruct arrays
+// within documents and output one document for each element of the array. 
+// It's commonly used when you have documents with arrays, and you want to perform operations on individual array elements.
 
-app.get('/userhobbies', async (req, res) => {
-  try {
-    // Example aggregation pipeline with $unwind stage to deconstruct the 'hobbies' array
-    const pipeline = [
-      {
-        $unwind: '$hobbies', // Deconstruct the 'hobbies' array
-      },
-    ];
-
-    // Use Model.aggregate() to perform aggregation with $unwind stage
-    const result = await userModel.aggregate(pipeline);
-
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
