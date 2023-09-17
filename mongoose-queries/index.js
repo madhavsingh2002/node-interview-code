@@ -413,18 +413,37 @@ app.get('/limitedusers',async(req,res)=>{
 
 // Mongoose Aggregation-8: $skip
 // Route to perform aggregation with $skip stage
-app.get('/skippedusers', async (req, res) => {
-  try {
-    const skipValue = parseInt(req.query.skip) || 0; // Get skip value from query parameters (default to 0 if not provided)
 
-    // Example aggregation pipeline with $skip stage to skip the initial documents
+// Let's see the simple example where we will skip first 5 users from list using $skip..
+app.get('/skippedusers',async(req,res)=>{
+  try{
+    const skipValue = parseInt(req.query.skip) || 0; // we get this value from query..
+    const Pipeline =[
+      {
+        $skip: skipValue
+      }
+    ]
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result);
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+// Mongoose Aggregation-9: $unwind
+// Route to perform aggregation with $unwind stage
+
+app.get('/userhobbies', async (req, res) => {
+  try {
+    // Example aggregation pipeline with $unwind stage to deconstruct the 'hobbies' array
     const pipeline = [
       {
-        $skip: skipValue, // Skip the specified number of documents
+        $unwind: '$hobbies', // Deconstruct the 'hobbies' array
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $skip stage
+    // Use Model.aggregate() to perform aggregation with $unwind stage
     const result = await userModel.aggregate(pipeline);
 
     res.json(result);
