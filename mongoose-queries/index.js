@@ -517,7 +517,7 @@ app.get('/createNewCollection', async (req, res) => {
     ];
 
     // Use Model.aggregate() to perform aggregation with $out stage
-    await User.aggregate(pipeline);
+    await userModel.aggregate(pipeline);
 
     res.json({ message: 'New collection created successfully!' });
   } catch (err) {
