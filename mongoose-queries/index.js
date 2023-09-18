@@ -471,29 +471,59 @@ const orderSchema = new mongoose.Schema({
 });
 */
 // Route to perform aggregation with $lookup stage
-app.get('/userOrders', async (req, res) => {
+// Let's see the example of it.....
+app.get('/userOrders',async(req,res)=>{
+  try{
+    // Pipeline with $lookup stage to join User and Orders Collection....
+    const Pipeline =[
+      {
+        $lookup:{
+          from: 'orders',// the name of the target collection to join.
+          localField:'_id',// The field from the current (User) that links to the target collection (orders)
+          foreignField:'userId',// The field from the target collection (Order) that matches the localfield..
+          as:'orders',/// the alias for the joined array field
+
+        }
+      }
+    ]
+    // use Model.aggregate() to perform aggregation with $lookup stage..
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+// Mongoose Aggregation-11: $out.
+
+// The $out stage in MongoDB's aggregation framework is used to write the result of an aggregation
+// pipeline to a specified collection in the database. It allows you to save the aggregated data 
+// as a new collection or overwrite an existing collection with the aggregated data.
+
+// Route to perform aggregation with $out stage
+
+app.get('/createNewCollection', async (req, res) => {
   try {
-    // Example aggregation pipeline with $lookup stage to join User and Order collections
+    // Example aggregation pipeline with $out stage to create a new collection
     const pipeline = [
       {
-        $lookup: {
-          from: 'orders', // The name of the target collection to join
-          localField: '_id', // The field from the current collection (User) that links to the target collection (Order)
-          foreignField: 'userId', // The field from the target collection (Order) that matches the localField
-          as: 'orders', // The alias for the joined array field
+        $match: {
+          age: { $gte: 30 }, // Filter users with age greater than or equal to 30
         },
+      },
+      {
+        $out: 'newCollection', // Create a new collection named 'newCollection' with the aggregated data
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $lookup stage
-    const result = await User.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $out stage
+    await User.aggregate(pipeline);
 
-    res.json(result);
+    res.json({ message: 'New collection created successfully!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
