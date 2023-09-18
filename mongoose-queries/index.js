@@ -471,7 +471,7 @@ const orderSchema = new mongoose.Schema({
 });
 */
 // Route to perform aggregation with $lookup stage
-// Let's see the example of it.....
+
 app.get('/userOrders',async(req,res)=>{
   try{
     // Pipeline with $lookup stage to join User and Orders Collection....
@@ -494,6 +494,7 @@ app.get('/userOrders',async(req,res)=>{
     res.status(505).json({error:err.message})
   }
 })
+
 // Mongoose Aggregation-11: $out.
 
 // The $out stage in MongoDB's aggregation framework is used to write the result of an aggregation
@@ -501,29 +502,54 @@ app.get('/userOrders',async(req,res)=>{
 // as a new collection or overwrite an existing collection with the aggregated data.
 
 // Route to perform aggregation with $out stage
-
-app.get('/createNewCollection', async (req, res) => {
-  try {
-    // Example aggregation pipeline with $out stage to create a new collection
-    const pipeline = [
+app.get('/createNewCollection',async(req,res)=>{
+  try{
+    // Aggregation pipeline with $out stage to create new collection...
+    const Pipeline=[
       {
-        $match: {
-          age: { $gte: 30 }, // Filter users with age greater than or equal to 30
-        },
+        $match:{
+          age:{$gte:30}// filter users with age greater than or equal to 30
+        }
       },
       {
-        $out: 'newCollection', // Create a new collection named 'newCollection' with the aggregated data
+        $out: 'newCollection'// create a new collection named 'newCollection'...
+      }
+    ]
+    // use Model.aggregate() to perform aggregation with $out stage...
+    await userModel.aggregate(Pipeline)
+    res.json({message:'New Collection Created Successfully!'})
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+// Mongoose Aggregation-12: $addFields.
+
+// The $addFields stage in MongoDB's aggregation framework is used to add new fields to documents in an aggregation pipeline. 
+// It allows you to calculate or create new fields based on existing fields, constants, or expressions.
+
+// Route to perform aggregation with $addFields stage
+app.get('/addCustomField', async (req, res) => {
+  try {
+    // Example aggregation pipeline with $addFields stage to calculate a custom field
+    const pipeline = [
+      {
+        $addFields: {
+          fullName: { $concat: ['$username', ' (', { $toString: '$age' }, ' years old)'] }, // Calculate a custom field 'fullName'
+        },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $out stage
-    await userModel.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $addFields stage
+    const result = await userModel.aggregate(pipeline);
 
-    res.json({ message: 'New collection created successfully!' });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
