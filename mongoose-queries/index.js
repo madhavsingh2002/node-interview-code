@@ -455,7 +455,46 @@ app.get('/userhobblies',async(req,res)=>{
     res.status(505).json({error:err.message})
   }
 })
-// This is simple example of unwind......., thank's for watching.....
+// Mongoose Aggregation-10: $lookup
+
+// The $lookup stage in MongoDB's aggregation framework is used to perform a left outer join
+// between two collections in a database. It allows you to combine documents from the current 
+// collection (the "from" collection) with documents from another collection (the "localField"
+//  collection) based on a specified key relationship.
+
+/*
+
+const orderSchema = new mongoose.Schema({
+  orderNumber: String,
+  userId: mongoose.Schema.Types.ObjectId, // Reference to a user
+  // ... other order properties
+});
+*/
+// Route to perform aggregation with $lookup stage
+app.get('/userOrders', async (req, res) => {
+  try {
+    // Example aggregation pipeline with $lookup stage to join User and Order collections
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'orders', // The name of the target collection to join
+          localField: '_id', // The field from the current collection (User) that links to the target collection (Order)
+          foreignField: 'userId', // The field from the target collection (Order) that matches the localField
+          as: 'orders', // The alias for the joined array field
+        },
+      },
+    ];
+
+    // Use Model.aggregate() to perform aggregation with $lookup stage
+    const result = await User.aggregate(pipeline);
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
