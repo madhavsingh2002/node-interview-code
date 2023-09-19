@@ -582,7 +582,7 @@ app.get('/replaceRootAddress',async(req,res)=>{
           newRoot:'$address'//Promote the 'address' field to the top level
         }
       }
-    ]
+    ]// This is the simple example of Replaceroot, THank's for watching..............
     const result =  await userModel.aggregate(Pipeline)// to perfrom aggregation with $replaceRoot Stage...
     res.status(result)
   }
@@ -590,6 +590,56 @@ app.get('/replaceRootAddress',async(req,res)=>{
     res.status(505).json({error:err.message})
   }
 })
+
+
+// Mongoose Aggregation-14: $facet.
+
+// The $facet stage in MongoDB's aggregation framework allows you to perform multiple 
+// separate aggregation operations within a single pipeline. 
+// It's particularly useful when you need to compute multiple aggregations
+//  on the same dataset and return the results as separate arrays or sets of documents.
+
+// Route to perform aggregation with $facet stage
+app.get('/aggregateUserData', async (req, res) => {
+  try {
+    // Example aggregation pipeline with $facet stage to compute multiple aggregations
+    const pipeline = [
+      {
+        $match: {
+          age: { $gte: 30 }, // Filter users with age greater than or equal to 30
+        },
+      },
+      {
+        $facet: {
+          // Define multiple aggregation pipelines within $facet
+          totalUsers: [
+            {
+              $count: 'count', // Calculate the total number of users
+            },
+          ],
+          averageAge: [
+            {
+              $group: {
+                _id: null,
+                averageAge: { $avg: '$age' }, // Calculate the average age of users
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    // Use Model.aggregate() to perform aggregation with $facet stage
+    const result = await User.aggregate(pipeline);
+
+    res.json(result[0]); // Extract the results from the $facet stage
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
