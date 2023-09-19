@@ -600,40 +600,74 @@ app.get('/replaceRootAddress',async(req,res)=>{
 //  on the same dataset and return the results as separate arrays or sets of documents.
 
 // Route to perform aggregation with $facet stage
-app.get('/aggregateUserData', async (req, res) => {
-  try {
-    // Example aggregation pipeline with $facet stage to compute multiple aggregations
-    const pipeline = [
+
+app.get('/aggregateUserData',async(req,res)=>{
+  try{
+    // Example Aggregation pipline with $facet stage to compute multiple aggregations.
+    const Pipeline=[
       {
-        $match: {
-          age: { $gte: 30 }, // Filter users with age greater than or equal to 30
-        },
+        $match:{
+          age:{$gte:30}// Filter Users with age greate than or equal to 30
+        }
       },
       {
-        $facet: {
-          // Define multiple aggregation pipelines within $facet
-          totalUsers: [
+        $facet:{
+          //Define Multiple aggregation pipelines within $facet...
+          totalUsers:[
             {
-              $count: 'count', // Calculate the total number of users
+              $count: 'count'// Calculate the total number of users.
             },
           ],
-          averageAge: [
+          averageAge:[
             {
-              $group: {
-                _id: null,
-                averageAge: { $avg: '$age' }, // Calculate the average age of users
-              },
-            },
-          ],
+              $group:{
+                _id:null,
+                averageAge:{$avg:'$age'}// Calculate the average age of users.
+              }
+            }
+          ]
+
+        }
+      }
+    ]
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result[0])// Extract the results from the $facet stage..
+  }// Let's test api, Thank's for watching.........
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+
+// Mongoose Aggregation-15: $redact.
+
+
+// The $redact stage in MongoDB's aggregation framework is used to control 
+// the inclusion or exclusion of documents in the aggregation pipeline based
+// on certain conditions. It allows you to filter documents and decide whether
+// to keep, skip, or exclude them from the result set.
+
+
+// Route to perform aggregation with $redact stage
+app.get('/filterAdminUsers', async (req, res) => {
+  try {
+    // Example aggregation pipeline with $redact stage to filter admin users
+    const pipeline = [
+      {
+        $redact: {
+          $cond: {
+            if: { $eq: ['$role', 'admin'] }, // Check if the user's role is 'admin'
+            then: '$$KEEP', // Keep the document if the condition is true (user is an admin)
+            else: '$$PRUNE', // Prune (exclude) the document if the condition is false (user is not an admin)
+          },
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $facet stage
+    // Use Model.aggregate() to perform aggregation with $redact stage
     const result = await User.aggregate(pipeline);
 
-    res.json(result[0]); // Extract the results from the $facet stage
-
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
