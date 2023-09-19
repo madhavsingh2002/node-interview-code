@@ -674,6 +674,9 @@ app.get('/filterAdminUsers',async(req,res)=>{
   }
 })
 
+
+// Mongoose Aggregation-16: $expr.
+
 // Route to perform aggregation with $expr stage
 
 // The $expr operator in MongoDB's aggregation framework 
@@ -694,29 +697,63 @@ app.get('/filterAdminUsers',async(req,res)=>{
 
 
 // Route to perform aggregation with $expr operator
-app.get('/retirementEligibleUsers', async (req, res) => {
+
+// Let me explain this with simple example.....
+app.get('/retirementEligiableUsers',async(req,res)=>{
+  try{
+    // Aggregation Pipeline with $expr operation to filter retirement-eligible users.
+    const Pipeline= [
+      {
+        $match:{
+          $expr:{
+            $gte:['$age','$retirementAge'],// Check if age is greater than or equal to retirement age.
+          }
+        }
+      }
+    ]
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err) {
+    res.status(505).json({error:err.message})
+  }
+})// This is simple example of it, i hope you like, Thank's for watching.......
+
+
+// Mongoose Aggregation-17: $expr.
+
+// The $merge stage in MongoDB's aggregation framework is used 
+// to write the result of an aggregation pipeline into a 
+// specified collection or view. It allows you to create a new 
+// collection or update an existing one with the documents 
+// produced by the aggregation pipeline.
+
+// Route to perform aggregation with $merge stage
+
+app.get('/mergeResults', async (req, res) => {
   try {
-    // Example aggregation pipeline with $expr operator to filter retirement-eligible users
+    // Example aggregation pipeline with $merge stage to write results into a new collection
     const pipeline = [
       {
         $match: {
-          $expr: {
-            $gte: ['$age', '$retirementAge'], // Check if age is greater than or equal to retirementAge
-          },
+          age: { $gte: 30 }, // Filter users with age greater than or equal to 30
+        },
+      },
+      {
+        $merge: {
+          into: 'filteredUsers', // Specify the name of the target collection or view
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $expr operator
-    const result = await User.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $merge stage
+    await User.aggregate(pipeline);
 
-    res.json(result);
+    res.json({ message: 'Aggregation results merged into the "filteredUsers" collection.' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
