@@ -922,26 +922,64 @@ app.get('/categorizeSales',async(req,res)=>{
 const productSchema = new mongoose.Schema({
   name: String,
   category: String,
-  // ... other product properties
+  // ... other product properties // This is Product Schema
 });
 
 const Product = mongoose.model('Product', productSchema);
 
 */
 // Route to perform aggregation with $sortByCount stage
-app.get('/mostCommonCategories', async (req, res) => {
-  try {
-    // Example aggregation pipeline with $sortByCount stage to find most common categories
-    const pipeline = [
+
+// Let's see the simple example of it...
+
+app.get('/mostCommonCategories',async(req,res)=>{
+  try{
+    // Aggregation pipeline with $sortByCount Stage to find most common Categories..
+    const Pipeline=[
       {
-        $sortByCount: '$category', // Group and count by the 'category' field
-      },
-    ];
+        $sortByCount: '$category',// Group and count by the category field...
+      }
+    ]
+    // Use Model.aggregate() to perform aggregation with $sortByCount Stage..
+    const result = await Product.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
 
-    // Use Model.aggregate() to perform aggregation with $sortByCount stage
-    const result = await Product.aggregate(pipeline);
+// Mongoose Aggregation-21: $sortByCount.
 
-    res.json(result);
+// Define a User schema and model
+
+/*
+const userSchema = new mongoose.Schema({
+  username: String,
+  hobbies: [String], // Array of user's hobbies
+  // ... other user properties
+});
+
+const User = mongoose.model('User', userSchema);
+*/
+
+// Route to remove a specific hobby from a user's hobbies list
+
+app.put('/removeHobby/:userId/:hobbyToRemove', async (req, res) => {
+  try {
+    const { userId, hobbyToRemove } = req.params;
+
+    // Use Mongoose's updateOne method with $pull to remove the specified hobby
+    const result = await User.updateOne(
+      { _id: userId },
+      { $pull: { hobbies: hobbyToRemove } }
+    );
+
+    if (result.nModified === 1) {
+      res.json({ message: 'Hobby removed successfully.' });
+    } else {
+      res.status(404).json({ error: 'User not found or hobby not in user\'s list.' });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
