@@ -548,6 +548,7 @@ app.get('/addCustomField', async(req,res)=>{
     res.status(505).json({error:err.message})
   }
 })
+// Mongoose Aggregation-13: $replaceRoot.
 
 /*  The $replaceRoot stage in MongoDB's aggregation framework is used to replace
  the current document with a new document. It allows you to promote a subdocument 
@@ -562,36 +563,33 @@ const userSchema = new mongoose.Schema({
     street: String,
     city: String,
     zipCode: String,
-  },
+  },// this the address field.....
   // ... other user properties
 });
 */ 
 // Route to perform aggregation with $replaceRoot stage
-app.get('/replaceRootAddress', async (req, res) => {
-  try {
-    // Example aggregation pipeline with $replaceRoot stage to promote the 'address' field
-    const pipeline = [
+app.get('/replaceRootAddress',async(req,res)=>{
+  try{
+    // Example aggregation pipeline with replaceroot stage to promote the address field...
+    const Pipeline=[
       {
-        $match: {
-          username: 'john_doe', // Filter documents by username
-        },
+        $match:{
+          username:'user6',//Filter docu by username
+        }
       },
       {
-        $replaceRoot: {
-          newRoot: '$address', // Promote the 'address' field to the top level
-        },
-      },
-    ];
-
-    // Use Model.aggregate() to perform aggregation with $replaceRoot stage
-    const result = await User.aggregate(pipeline);
-
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+        $replaceRoot:{
+          newRoot:'$address'//Promote the 'address' field to the top level
+        }
+      }
+    ]
+    const result =  await userModel.aggregate(Pipeline)// to perfrom aggregation with $replaceRoot Stage...
+    res.status(result)
   }
-});
-
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
