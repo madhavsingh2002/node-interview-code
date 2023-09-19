@@ -868,31 +868,78 @@ app.get('/findNearByLocations',async(req,res)=>{
 const saleSchema = new mongoose.Schema({
   productName: String,
   price: Number,
-  // ... other sale properties
+  // ... other sale properties// This is the saleSchema
 });
 
 const Sale = mongoose.model('Sale', saleSchema);
 */
 // Route to perform aggregation with $bucket stage
-app.get('/categorizeSales', async (req, res) => {
+
+// Let's see the simple example of it.
+
+app.get('/categorizeSales',async(req,res)=>{
+  try{
+    // Aggregation pipeline with Bucket stage to categorize sales by price range..
+    const Pipeline=[
+      {
+        $bucket:{
+          groupBy:'$price',// Field to group by (price in this case)
+          boundaries:'[0,100,200,300]',// Price range boundaries..
+          default:'Other',// Default bucket for values outside the sp. boundaries,
+          output:{
+            count:{$sum:1},// Count the number of sales in each bucket..
+            totalPrice:{$sum:'$price'}//Calculate the total price in each bucket...
+          }
+        }
+      }
+    ]
+    // Use Model.aggregate() to perform aggregation with $bucket stage...
+    const result = await Sale.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+
+
+
+// Mongoose Aggregation-21: $sortByCount.
+
+// The $sortByCount stage in MongoDB's aggregation framework 
+// is used to group documents by a specified field's values 
+// and count the occurrences of each value. It is essentially
+//  a combination of the $group and $sort stages, making it 
+// convenient for tasks like creating frequency distributions 
+// or finding the most common values in a field.
+
+
+// Define a Product schema and model
+
+/*
+
+const productSchema = new mongoose.Schema({
+  name: String,
+  category: String,
+  // ... other product properties
+});
+
+const Product = mongoose.model('Product', productSchema);
+
+*/
+// Route to perform aggregation with $sortByCount stage
+app.get('/mostCommonCategories', async (req, res) => {
   try {
-    // Example aggregation pipeline with $bucket stage to categorize sales by price range
+    // Example aggregation pipeline with $sortByCount stage to find most common categories
     const pipeline = [
       {
-        $bucket: {
-          groupBy: '$price', // Field to group by (price in this case)
-          boundaries: [0, 100, 200, 300], // Price range boundaries
-          default: 'Other', // Default bucket for values outside the specified boundaries
-          output: {
-            count: { $sum: 1 }, // Count the number of sales in each bucket
-            totalPrice: { $sum: '$price' }, // Calculate the total price in each bucket
-          },
-        },
+        $sortByCount: '$category', // Group and count by the 'category' field
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $bucket stage
-    const result = await Sale.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $sortByCount stage
+    const result = await Product.aggregate(pipeline);
 
     res.json(result);
   } catch (err) {
