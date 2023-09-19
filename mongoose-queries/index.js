@@ -830,34 +830,75 @@ const Location = mongoose.model('Location', locationSchema);
 
 */
 // Route to perform aggregation with $geoNear stage
-app.get('/findNearbyLocations', async (req, res) => {
+
+
+app.get('/findNearByLocations',async(req,res)=>{
+  try{
+    // example aggregation pipeline with $geonear stage to find nearby locations..
+    const Pipeline=[
+      {
+        $geoNear:{
+          near:{
+            type:'Point',
+            coordinates:[longitude,latitude]// Provide the coordinates of the target location
+          }
+        },
+        distanceField:'distance',// Field to store calculated distances,
+        maxDistance:1000,//Maximum distance in meters
+        spherical:true,//Use a spherical model..
+      }
+    ]
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+// Mongoose Aggregation-20: $bucket.
+
+// The $bucket stage in MongoDB's aggregation framework is used 
+// for grouping and categorizing documents into "buckets" based
+// on specified criteria. It allows you to create histograms or
+// group data into discrete ranges, making it useful for data 
+// analysis and visualization.
+
+// Define a Sale schema and model for sales data
+
+/*
+const saleSchema = new mongoose.Schema({
+  productName: String,
+  price: Number,
+  // ... other sale properties
+});
+
+const Sale = mongoose.model('Sale', saleSchema);
+*/
+// Route to perform aggregation with $bucket stage
+app.get('/categorizeSales', async (req, res) => {
   try {
-    // Example aggregation pipeline with $geoNear stage to find nearby locations
+    // Example aggregation pipeline with $bucket stage to categorize sales by price range
     const pipeline = [
       {
-        $geoNear: {
-          near: {
-            type: 'Point',
-            coordinates: [longitude, latitude], // Provide the coordinates of the target location
+        $bucket: {
+          groupBy: '$price', // Field to group by (price in this case)
+          boundaries: [0, 100, 200, 300], // Price range boundaries
+          default: 'Other', // Default bucket for values outside the specified boundaries
+          output: {
+            count: { $sum: 1 }, // Count the number of sales in each bucket
+            totalPrice: { $sum: '$price' }, // Calculate the total price in each bucket
           },
-          distanceField: 'distance', // Field to store calculated distances
-          maxDistance: 1000, // Maximum distance in meters
-          spherical: true, // Use a spherical (earth-like) model
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $geoNear stage
-    const result = await Location.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $bucket stage
+    const result = await Sale.aggregate(pipeline);
 
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
