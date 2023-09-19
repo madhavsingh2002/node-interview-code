@@ -530,26 +530,67 @@ app.get('/createNewCollection',async(req,res)=>{
 // It allows you to calculate or create new fields based on existing fields, constants, or expressions.
 
 // Route to perform aggregation with $addFields stage
-app.get('/addCustomField', async (req, res) => {
+
+app.get('/addCustomField', async(req,res)=>{
+  try{
+    const Pipeline=[
+      {
+        $addFields:{
+          fullName:{$concat:['$username','(',{$toString:'$age'},' Years Old)']}
+        }
+      }
+    ]
+    // use Model.aggregate() to perform aggregation with $addFields stage...
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+/*  The $replaceRoot stage in MongoDB's aggregation framework is used to replace
+ the current document with a new document. It allows you to promote a subdocument 
+ or a specific field to the top level of the resulting document structure. */
+/*
+
+// Define a User schema and model with nested address
+const userSchema = new mongoose.Schema({
+  username: String,
+  email: String,
+  address: {
+    street: String,
+    city: String,
+    zipCode: String,
+  },
+  // ... other user properties
+});
+*/ 
+// Route to perform aggregation with $replaceRoot stage
+app.get('/replaceRootAddress', async (req, res) => {
   try {
-    // Example aggregation pipeline with $addFields stage to calculate a custom field
+    // Example aggregation pipeline with $replaceRoot stage to promote the 'address' field
     const pipeline = [
       {
-        $addFields: {
-          fullName: { $concat: ['$username', ' (', { $toString: '$age' }, ' years old)'] }, // Calculate a custom field 'fullName'
+        $match: {
+          username: 'john_doe', // Filter documents by username
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: '$address', // Promote the 'address' field to the top level
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $addFields stage
-    const result = await userModel.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $replaceRoot stage
+    const result = await User.aggregate(pipeline);
 
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
