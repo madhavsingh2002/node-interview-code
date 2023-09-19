@@ -720,7 +720,7 @@ app.get('/retirementEligiableUsers',async(req,res)=>{
 })// This is simple example of it, i hope you like, Thank's for watching.......
 
 
-// Mongoose Aggregation-17: $expr.
+// Mongoose Aggregation-17: $Merge.
 
 // The $merge stage in MongoDB's aggregation framework is used 
 // to write the result of an aggregation pipeline into a 
@@ -730,30 +730,79 @@ app.get('/retirementEligiableUsers',async(req,res)=>{
 
 // Route to perform aggregation with $merge stage
 
-app.get('/mergeResults', async (req, res) => {
+// Let's see the simple example of it...
+app.get('/mergeResult',async(req,res)=>{
+  try{
+    // Aggregation Pipeline with $merge stage to write results into a new collection
+    const Pipeline =[
+      {
+        $match:{
+           age:{$gte:30}// Filter users with age greater than or equal to  30..
+        }
+      },
+      {
+        $merge:{
+          into:'filteredUserd',// Specify the name of the target collection....
+        }
+      }
+      
+    ]
+    // use model.aggregate() to perform aggregation with $merge stage.
+    await userModel.aggregate(Pipeline)
+    res.json({message:'Aggregation Results merged into the  filterdUsers collection'})
+  }
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
+
+
+// Mongoose Aggregation-18: $graphLookup.
+
+// The $graphLookup stage in MongoDB's aggregation framework is 
+// used for recursive queries on graph data structures stored 
+// in a collection. It allows you to perform hierarchical or 
+// tree-like searches, such as finding ancestors or descendants 
+// of a document in a graph.
+
+
+// Define a Person schema and model for a family tree
+// const personSchema = new mongoose.Schema({
+//   name: String,
+//   parent: mongoose.Schema.Types.ObjectId, // Reference to the parent person
+// });
+
+// Route to perform aggregation with $graphLookup stage
+
+app.get('/findAncestors', async (req, res) => {
   try {
-    // Example aggregation pipeline with $merge stage to write results into a new collection
+    // Example aggregation pipeline with $graphLookup stage to find ancestors
     const pipeline = [
       {
         $match: {
-          age: { $gte: 30 }, // Filter users with age greater than or equal to 30
+          name: 'John', // Start with a person named 'John'
         },
       },
       {
-        $merge: {
-          into: 'filteredUsers', // Specify the name of the target collection or view
+        $graphLookup: {
+          from: 'people', // The source collection
+          startWith: '$parent', // Field that contains the starting person's parent
+          connectFromField: 'parent', // Field that connects to the parent
+          connectToField: '_id', // Field that connects to the _id of other documents
+          as: 'ancestors', // Alias for the result
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $merge stage
-    await User.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $graphLookup stage
+    const result = await Person.aggregate(pipeline);
 
-    res.json({ message: 'Aggregation results merged into the "filteredUsers" collection.' });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
