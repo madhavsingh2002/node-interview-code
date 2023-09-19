@@ -649,22 +649,65 @@ app.get('/aggregateUserData',async(req,res)=>{
 
 
 // Route to perform aggregation with $redact stage
-app.get('/filterAdminUsers', async (req, res) => {
+
+// Let's explain this with simple example.....
+app.get('/filterAdminUsers',async(req,res)=>{
+  try{
+    // Aggregation pipeline with $redact stage to filter admin users.
+    const Pipeline=[
+      {
+        $redact:{
+          $cond:{
+            if:{$eq:['$role','admin']},// check if the user's role is admin..
+            then:'$$KEEP',// Keep the document if the condition is true....
+            else:'$$PRUNE',// Prune the document if the condition is false
+          }
+        }
+      }
+    ]
+    // use Model.aggregate() to perform aggregation with $redact stage.
+    const result = await userModel.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch(err){
+    res.status(500).json({error:err.message})
+  }
+})
+
+// Route to perform aggregation with $expr stage
+
+// The $expr operator in MongoDB's aggregation framework 
+// allows you to use aggregation expressions to perform 
+// conditional operations within an aggregation pipeline. 
+// It's useful when you need to compare fields, values, or
+// perform conditional logic based on specific criteria.
+
+
+// Define a User schema and model with age and retirementAge fields
+// const userSchema = new mongoose.Schema({
+//   username: String,
+//   email: String,
+//   age: Number,
+//   retirementAge: Number, // Age at which a user can retire
+//   // ... other user properties
+// });
+
+
+// Route to perform aggregation with $expr operator
+app.get('/retirementEligibleUsers', async (req, res) => {
   try {
-    // Example aggregation pipeline with $redact stage to filter admin users
+    // Example aggregation pipeline with $expr operator to filter retirement-eligible users
     const pipeline = [
       {
-        $redact: {
-          $cond: {
-            if: { $eq: ['$role', 'admin'] }, // Check if the user's role is 'admin'
-            then: '$$KEEP', // Keep the document if the condition is true (user is an admin)
-            else: '$$PRUNE', // Prune (exclude) the document if the condition is false (user is not an admin)
+        $match: {
+          $expr: {
+            $gte: ['$age', '$retirementAge'], // Check if age is greater than or equal to retirementAge
           },
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $redact stage
+    // Use Model.aggregate() to perform aggregation with $expr operator
     const result = await User.aggregate(pipeline);
 
     res.json(result);
@@ -672,6 +715,7 @@ app.get('/filterAdminUsers', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 app.listen(PORT, () => {
