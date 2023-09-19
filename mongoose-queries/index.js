@@ -768,40 +768,95 @@ app.get('/mergeResult',async(req,res)=>{
 
 // Define a Person schema and model for a family tree
 // const personSchema = new mongoose.Schema({
-//   name: String,
+//   name: String,// This is Person Schema...
 //   parent: mongoose.Schema.Types.ObjectId, // Reference to the parent person
 // });
 
 // Route to perform aggregation with $graphLookup stage
 
-app.get('/findAncestors', async (req, res) => {
-  try {
-    // Example aggregation pipeline with $graphLookup stage to find ancestors
-    const pipeline = [
+// Let's Understands this with simple example.
+app.get('/findAncestors',async(req,res)=>{
+  try{
+    // Aggregation Pipeline With $graphLookup stage to find ancestors...
+    const Pipeline =[
       {
-        $match: {
-          name: 'John', // Start with a person named 'John'
-        },
+        $match:{
+          name:'John'// Start with a person named 'john'
+        }
       },
       {
-        $graphLookup: {
-          from: 'people', // The source collection
-          startWith: '$parent', // Field that contains the starting person's parent
-          connectFromField: 'parent', // Field that connects to the parent
-          connectToField: '_id', // Field that connects to the _id of other documents
-          as: 'ancestors', // Alias for the result
+        $graphLookup:{
+          from:'people',// the Source collection..
+          startWith:'$parent',// Field that contains the starting person's parent.
+          connectToField:'_id',// Field that connects to the Id of other documents.
+          as:'ancestors',// Alias for the result...
+
+        }
+      }
+
+    ]
+    // Use Model.aggregate to perform aggregation with $graphLookup stage.
+    const result = await Person.aggregate(Pipeline)
+    res.json(result)
+  }
+  catch{
+    res.status(505).json({error:err.message})
+  }
+})
+
+// Mongoose Aggregation-19: $geoNear.
+
+// The $geoNear stage in MongoDB's aggregation framework is used 
+// to perform proximity-based searches, particularly in the context
+//  of geospatial data. It allows you to find documents that are 
+// near a specified geographic point and can calculate distances 
+// between the documents and the given point.
+
+/*
+// Define a Location schema and model for geospatial data
+
+const locationSchema = new mongoose.Schema({
+  name: String,
+  location: {
+    type: { type: String, default: 'Point' },
+    coordinates: [Number], // [longitude, latitude]
+  },
+  // ... other location properties
+});
+
+locationSchema.index({ location: '2dsphere' }); // Create a 2dsphere index for geospatial queries
+
+const Location = mongoose.model('Location', locationSchema);
+
+*/
+// Route to perform aggregation with $geoNear stage
+app.get('/findNearbyLocations', async (req, res) => {
+  try {
+    // Example aggregation pipeline with $geoNear stage to find nearby locations
+    const pipeline = [
+      {
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [longitude, latitude], // Provide the coordinates of the target location
+          },
+          distanceField: 'distance', // Field to store calculated distances
+          maxDistance: 1000, // Maximum distance in meters
+          spherical: true, // Use a spherical (earth-like) model
         },
       },
     ];
 
-    // Use Model.aggregate() to perform aggregation with $graphLookup stage
-    const result = await Person.aggregate(pipeline);
+    // Use Model.aggregate() to perform aggregation with $geoNear stage
+    const result = await Location.aggregate(pipeline);
 
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 
 app.listen(PORT, () => {
