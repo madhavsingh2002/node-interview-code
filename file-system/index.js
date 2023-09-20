@@ -23,21 +23,34 @@ app.get('/readfile',async(req,res)=>{
 
 // CREATE: fs.appendFile.
 
-app.get('/create/appendfile', (req, res) => {
-    const contentToAppend = 'Hello content!';
-  
-    fs.appendFile('mynewfile1.txt', contentToAppend, (err) => {
+app.get('/create/appendfile',async(req,res)=>{
+    const contentToAppend ='Hello Content';
+    fs.appendFile('newfile.txt',contentToAppend,(err)=>{
+        
+        if(err){
+            console.error(err)
+            res.status(505).send('Interval Server Error')
+            return
+        }
+        console.log('Saved')
+        res.send('Content Appended to newfile.txt')
+    })
+})
+
+// CREATE: fs.open.
+
+app.get('/create/open', (req, res) => {
+    fs.open('newfile.txt', 'w', (err, file) => {
       if (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
         return;
       }
   
-      console.log('Saved!');
-      res.send('Content appended to mynewfile1.txt');
+      console.log('File created!');
+      res.send('File mynewfile2.txt created');
     });
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
