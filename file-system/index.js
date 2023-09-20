@@ -82,7 +82,25 @@ app.get('/update/appendfile', (req, res) => {
       console.log('File updated!');
       res.send('Content appended to mynewfile1.txt');
     });
-  });
+});
+
+// Update: fs.writeFile().
+
+app.get('/update/writefile', (req, res) => {
+    const contentToWrite = 'This is my text';
+  
+    fs.writeFile('mynewfile3.txt', contentToWrite, (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+  
+      console.log('File replaced!');
+      res.send('Content replaced in mynewfile3.txt');
+    });
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
