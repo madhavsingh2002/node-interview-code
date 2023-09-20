@@ -990,38 +990,42 @@ app.put('/removeHobby/:userId/:hobbyToRemove',async(req,res)=>{
 
 // Mongoose Aggregation-23: $in.
 
-// The $in operator in MongoDB is used to query for documents where a specified field's value matches 
-// any of the values in an array. It allows you to perform an "OR" operation on a field, finding 
-// documents where the field matches any of the specified values.
+/*
+DEFINITION:
+The $in operator in Monogodb is used to query for documents where a sp. field value matches.
+any of the values in an array. it allows you to perform an "or" operation on a field, finding
+documents where the field matches any of the specified value...
+
+
+*/
 
 /*
 // Define a Product schema and model
 
-const productSchema = new mongoose.Schema({
-  name: String,
-  category: String,
-  // ... other product properties
-});
-
-const Product = mongoose.model('Product', productSchema);
 */
+const productSchema= new mongoose.Schema({
+  name:String,
+  category:String,
+
+})
+const Product = mongoose.model('Product',productSchema)
+
 
 // Route to find products that belong to specific categories using $in
 
-app.get('/productsByCategory', async (req, res) => {
-  try {
-    const categoriesToSearch = req.query.categories; // Array of category names
-
-    // Use Mongoose's find method with $in to find products in specified categories
-    const products = await Product.find({ category: { $in: categoriesToSearch } });
-
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+app.get('/productsByCategory',async(req,res)=>{
+  try{
+    const categoriesToSearch = req.query.categories;// Array of category names.
+    // use Mongoose find method with $in to find products,in specified categories.
+    const products = await Product.find({category:{$in:categoriesToSearch}})
+    res.json(products)
   }
-});
+  catch(err){
+    res.status(505).json({error:err.message})
+  }
+})
 
-
+// THank's for watching....
 
 
 
