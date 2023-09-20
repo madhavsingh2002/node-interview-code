@@ -54,18 +54,33 @@ app.get('/create/open',async(req,res)=>{
 
 // CREATE: fs.writeFile.
 
-app.get('/write', (req, res) => {
-    const contentToWrite = 'Hello content!';
+app.get('/create/writefile',async(req,res)=>{
+    const contentToWrite = 'Hello Content'
+    fs.writeFile('newfile3.txt',contentToWrite,(err)=>{
+        if(err){
+            console.error(err)
+            res.status(505).send('Internal Server Error')
+            return;
+        }
+    })
+    console.log('File Saved')
+    res.send('File newfile3.txt saved')
+})
+
+// Update: fs.appendFile().
+
+app.get('/update/appendfile', (req, res) => {
+    const contentToAppend = ' This is my text.\n';
   
-    fs.writeFile('mynewfile3.txt', contentToWrite, (err) => {
+    fs.appendFile('newfile.txt', contentToAppend, (err) => {
       if (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
         return;
       }
   
-      console.log('File saved!');
-      res.send('File mynewfile3.txt saved');
+      console.log('File updated!');
+      res.send('Content appended to mynewfile1.txt');
     });
   });
 
