@@ -101,34 +101,34 @@ app.get('/update/writefile',(req,res)=>{
 
 // Delete: fs.unlink().
 
-app.get('/delete', (req, res) => {
-    fs.unlink('mynewfile2.txt', (err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
-  
-      console.log('File deleted!');
-      res.send('File mynewfile2.txt deleted');
-    });
-});
+app.get('/delete',(req,res)=>{
+    fs.unlink('newfile3.txt',(err)=>{
+        if(err){
+            console.error(err)
+            res.status(500).send('Internal Server Error')
+            return;
+        }
+        console.log('File Deleted')
+        res.send('File newfile3.txt deleted')
+    })/// THis is the simple example of unlink(), Thank's for watching...........
+})
+
 
 // Rename: fs.rename().
 
+app.get('/rename',async(req,res)=>{
+    fs.rename('newfile.txt','rename.txt',(err)=>{
+        if(err){
+            console.log(err)
+            res.status(500).send('Internal Server Error')
+            return;
+        }
+        console.log('File named')
+        res.send('file newfile.txt renamed to rename.txt')
+    })
+})// let's test this...,Thank' for watching....
 
-app.get('/rename', (req, res) => {
-    fs.rename('mynewfile1.txt', 'myrenamedfile.txt', (err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
-  
-      console.log('File renamed!');
-      res.send('File mynewfile1.txt renamed to myrenamedfile.txt');
-    });
-});
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
