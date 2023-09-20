@@ -69,38 +69,66 @@ app.get('/create/writefile',async(req,res)=>{
 
 // Update: fs.appendFile().
 
-app.get('/update/appendfile', (req, res) => {
-    const contentToAppend = ' This is my text.\n';
-  
-    fs.appendFile('newfile.txt', contentToAppend, (err) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
-  
-      console.log('File updated!');
-      res.send('Content appended to mynewfile1.txt');
-    });
-});
+
+app.get('/update/appendfile',async(req,res)=>{
+    const contentToAppend = 'This is my text';
+    fs.appendFile('newfile.txt',contentToAppend,(err)=>{
+        if(err){
+            console.error(err)
+            res.status(500).send('Internal Server Error')
+            return
+        }
+        console.log('File Updated')
+        res.send('Content appended to newfile.txt')
+    })
+})
 
 // Update: fs.writeFile().
 
-app.get('/update/writefile', (req, res) => {
-    const contentToWrite = 'This is my text';
-  
-    fs.writeFile('mynewfile3.txt', contentToWrite, (err) => {
+
+app.get('/update/writefile',(req,res)=>{
+    const contentToWrite ='This is my text'
+    fs.writeFile('newfile3.txt',contentToWrite,(err)=>{
+        if(err){
+            console.error(err);
+            res.status(500).send('Internal server error')
+            return;
+        }
+        console.log('File Replaced!')
+        res.send('Content Replaced in newfile3.txt')
+    })
+})
+
+// Delete: fs.unlink().
+
+app.get('/delete', (req, res) => {
+    fs.unlink('mynewfile2.txt', (err) => {
       if (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
         return;
       }
   
-      console.log('File replaced!');
-      res.send('Content replaced in mynewfile3.txt');
+      console.log('File deleted!');
+      res.send('File mynewfile2.txt deleted');
     });
 });
 
+// Rename: fs.rename().
+
+
+app.get('/rename', (req, res) => {
+    fs.rename('mynewfile1.txt', 'myrenamedfile.txt', (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+  
+      console.log('File renamed!');
+      res.send('File mynewfile1.txt renamed to myrenamedfile.txt');
+    });
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
