@@ -4,7 +4,7 @@ const express = require('express')
 const app = express();
 // simple route
 app.get('/',(req,res)=>{
-    res.send('Hello World!')
+    res.send('Hello !')
 })
 // Listening server
 app.listen(8000,()=>{
